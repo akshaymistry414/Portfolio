@@ -1,31 +1,41 @@
 -- Exploring COVID19 data from 31/01/2020 to 01/01/2022. Dataset dowloaded from https://ourworldindata.org/covid-deaths
 
+
 -- Looking at total cases vs deaths in the UK
+
 SELECT location, date, total_cases, new_cases, total_deaths, (total_deaths/total_cases)*100 AS MortalityRate
 FROM `sql-tutorial-335412.Portfolio_Project.Death_info`
 WHERE location = 'United Kingdom'
 ORDER BY 1, 2;
 
+
 -- Looking at total cases vs population
+
 SELECT location, date, population, total_cases, (total_cases/population)*100 AS InfectionRate
 FROM `sql-tutorial-335412.Portfolio_Project.Death_info`
 WHERE location = 'United Kingdom'
 ORDER BY 1, 2;
 
+
 -- Looking at countries with highest infection rate compared to population
+
 SELECT location, population, MAX(total_cases) AS HighestInfectionCount, MAX((total_cases/population)*100) AS PercentPopulationInfected
 FROM `sql-tutorial-335412.Portfolio_Project.Death_info`
 GROUP BY location, population
 ORDER BY PercentPopulationInfected DESC;
 
+
 -- Showing death count of each country
+
 SELECT location, MAX(total_deaths) AS TotalDeathCount
 FROM `sql-tutorial-335412.Portfolio_Project.Death_info`
 WHERE continent IS NOT NULL
 GROUP BY location
 ORDER BY TotalDeathCount DESC; 
 
+
 -- Showing continents with highest death count
+
 SELECT location, MAX(total_deaths) AS TotalDeathCount
 FROM `sql-tutorial-335412.Portfolio_Project.Death_info`
 WHERE continent IS NULL 
@@ -36,7 +46,9 @@ WHERE continent IS NULL
 GROUP BY location
 ORDER BY TotalDeathCount DESC; 
 
+
 -- Global mortality rates
+
 SELECT SUM(new_cases) AS TotalCases, 
         SUM(new_deaths) AS TotalDeaths,
         (SUM(new_deaths)/SUM(new_cases))*100 AS MortalityRate
@@ -44,7 +56,9 @@ FROM `sql-tutorial-335412.Portfolio_Project.Death_info`
 WHERE continent IS NOT NULL
 ORDER BY 1, 2;
 
+
 -- Finding cumulative number of vaccinations given
+
 SELECT death.continent, death.location, death.date, death.population, vaccine.new_vaccinations,
     SUM(vaccine.new_vaccinations) OVER (PARTITION BY death.location ORDER BY death.location, death.date) AS CumulativeVaccinationCount
 FROM `sql-tutorial-335412.Portfolio_Project.Death_info` death
@@ -54,7 +68,9 @@ JOIN `sql-tutorial-335412.Portfolio_Project.Vaccination_info` vaccine
 WHERE death.continent IS NOT NULL 
 ORDER BY 2, 3;
 
+
 -- Finding cumulative percentage of population fully vaccinated
+
 WITH VaxCount AS 
 (
   SELECT death.continent, death.location, death.date, death.population, vaccine.people_fully_vaccinated,
@@ -71,6 +87,7 @@ FROM VaxCount;
 
 
 -- Vaccination rates of population per country
+
 WITH VaxCount AS (
   SELECT death.continent, death.location, death.date, death.population, vaccine.people_fully_vaccinated,
     SUM(vaccine.people_fully_vaccinated) OVER (PARTITION BY death.location ORDER BY death.location, death.date) AS CumulativeVaccinationCount
